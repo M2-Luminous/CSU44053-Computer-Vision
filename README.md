@@ -11,16 +11,16 @@ This application provides working versions of most of the functions taught in th
 A TIPS zip file (which is referred to as code samples on the linked website) is provided containing the necessary images, 
 Visual Studio project file and the full source files for this application. You are asked to:
 
-    Download the TIPS zip file  (which is referred to as code samples on the linked website).
-    link: https://publications.scss.tcd.ie/book-supplements/A-Practical-Introduction-to-Computer-Vision-with-OpenCV/Code/
-    Create a "Vision" folder under the U:/ drive (the user data drive) on the machine and uncompress the ZIP file to this location.
-    Open the Microsoft Visual Studio Solution file: U:/Vision/OpenCVExample/OpenCVExample
-    Compile the project (preferably in Debug mode).
-    Execute it and press the number 1, 2, ... , 9 to see the various types of processing.
-    Now examine the code.  To start with look at main.cpp, Images.cpp, and Histograms.cpp and try to understand what is going on.. 
-    Make some changes and see what impact they have.
-        Change the images used.
-        Change the parameters used for the various methods..
+    1. Download the TIPS zip file  (which is referred to as code samples on the linked website).
+        link: https://publications.scss.tcd.ie/book-supplements/A-Practical-Introduction-to-Computer-Vision-with-OpenCV/Code/
+    2. Create a "Vision" folder under the C:/ drive (the user data drive) on the machine and uncompress the ZIP file to this location.
+    3. Open the Microsoft Visual Studio Solution file: C:/Vision/OpenCVExample/OpenCVExample
+    4. Compile the project (preferably in Debug mode).
+    5. Execute it and press the number 1, 2, ... , 9 to see the various types of processing.
+    6. Now examine the code.  To start with look at main.cpp, Images.cpp, and Histograms.cpp and try to understand what is going on.. 
+    7. Make some changes and see what impact they have.
+        7.1 Change the images used.
+        7.2 Change the parameters used for the various methods..
 
 
 Assignment1: Table Tennis includes 3 part of code that was built for detecting specific objects in both .jpg and .mkv files
