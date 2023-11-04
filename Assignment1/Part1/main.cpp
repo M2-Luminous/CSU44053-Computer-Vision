@@ -1,5 +1,6 @@
 ﻿#include <opencv2/opencv.hpp>
 #include <string>
+#include <iostream>
 
 using namespace cv;
 using namespace std;
@@ -23,55 +24,41 @@ Mat Threshold(const Mat& img) {
     return thresh;
 }
 
-Mat ConvertHSV(const Mat& img) {
-    Mat img_hsv;
-    cvtColor(img, img_hsv, COLOR_BGR2HSV);
-    return img_hsv;
-}
-
 int main() {
-    string img_path = "../Assignment1/Balls/Ball10.jpg";
+    for (int i = 1; i <= 10; ++i) {
+        string img_path = "../Assignment1/Balls/Ball" + to_string(i) + ".jpg";
 
-    // Read the specific image
-    Mat img = imread(img_path);
+        Mat img = imread(img_path);
 
-    // Check if the image is loaded correctly
-    if (img.empty()) {
-        cerr << "Error: Image not loaded!" << endl;
-        return -1;
-    }
+        if (img.empty()) {
+            cerr << "Error: Image " << img_path << " not loaded!" << endl;
+            continue;
+        }
 
-    // Converting to grayscale
-    Mat img_gray = ConvertToGray(img);
+        Mat img_gray = ConvertToGray(img);
+        Mat thresh = Threshold(img_gray);
+        vector<Vec3f> circles = DetectCircles(img_gray);
 
-    // Thresholding
-    Mat thresh = Threshold(img_gray);
+        if (!circles.empty()) {
+            for (size_t j = 0; j < circles.size(); ++j) {
+                Point center(cvRound(circles[j][0]), cvRound(circles[j][1]));
+                int radius = cvRound(circles[j][2]);
+                circle(img, center, radius, Scalar(0, 255, 0), 2);
+                circle(img, center, 2, Scalar(0, 0, 255), 3);
+                cout << "Ball" << i << " - Center: (" << center.x << ", " << center.y << "), Diameter: " << 2 * radius << endl;
+            }
+        }
 
-    vector<Vec3f> circles = DetectCircles(img_gray);
+        imshow("detected circles - Ball" + to_string(i), img);
 
-    if (!circles.empty()) {
-        for (size_t i = 0; i < circles.size(); ++i) {
-            Point center(cvRound(circles[i][0]), cvRound(circles[i][1]));
-            int radius = cvRound(circles[i][2]);
-            // draw the outer circle
-            circle(img, center, radius, Scalar(0, 255, 0), 2);
-            // draw the center of the circle
-            circle(img, center, 2, Scalar(0, 0, 255), 3);
-            // Print the center coordinates of the circle and the diameter
-            cout << center.x << " " << center.y << " " << 2 * radius << endl;
+        int keyPressed = waitKey(0);
+
+        destroyWindow("detected circles - Ball" + to_string(i));
+
+        if (keyPressed == 27) {
+            break;
         }
     }
-
-    // Display the processed image
-    imshow("detected circles", img);
-
-    //string output_path = "../Assignment1/Balls/Ball10_detected.jpg";
-
-    // Save the processed image
-    //imwrite(output_path, img);
-
-    // Wait for a key press
-    waitKey(0);
 
     destroyAllWindows();
 
