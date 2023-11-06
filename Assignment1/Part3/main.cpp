@@ -24,9 +24,11 @@ int main() {
 
     double fps = cap.get(CAP_PROP_FPS); // Get the video's frame rate
 
+    int currentFrame = 0; // Variable to hold the current frame number
     std::string displayMessage; // Variable to hold the message
 
     while (cap.read(frame)) {
+        currentFrame++; // Increment frame number
         cvtColor(frame, hsv, COLOR_BGR2HSV);
         inRange(hsv, lowerBound, upperBound, mask);
 
@@ -55,7 +57,7 @@ int main() {
         if (ballPositions.empty()) {
             frames_without_ball++;
             if (frames_without_ball > 3) {
-                std::cout << "The ball is out of bounds!" << std::endl;
+                std::cout << "Frame " << currentFrame << ": The ball is out of bounds!" << std::endl;
                 displayMessage = "The ball is out of bounds!";
                 frames_without_ball = 0;
                 bounce_start_frame = -1;
@@ -74,7 +76,7 @@ int main() {
             int padding = 5; // Adjust the padding as needed
             if (currentPos.y >= netRectangle.y - padding && currentPos.y <= netRectangle.y + netRectangle.height + padding &&
                 currentPos.x >= netRectangle.x - padding && currentPos.x <= netRectangle.x + netRectangle.width + padding) {
-                std::cout << "Ball hit the net boundary!" << std::endl;
+                std::cout << "Frame " << currentFrame << ": Ball hit the net boundary!" << std::endl;
                 displayMessage = "Ball hit the net boundary!";
             } else {
                 displayMessage = ""; // Clear message if no specific condition is met
@@ -91,14 +93,14 @@ int main() {
             }
 
             if (bounce_start_frame > 1 && currentPos.y < prevPos.y) {
-                std::cout << "The ball bounced from the table!" << std::endl;
+                std::cout << "Frame " << currentFrame << ": The ball bounced from the table!" << std::endl;
                 displayMessage = "The ball bounced from the table!";
                 bounce_start_frame = -1;
             }
 
             if (currentPos.x < prevPos.x) {
                 if (ball_left_hit) {
-                    std::cout << "Ball hit by the right player!" << std::endl;
+                    std::cout << "Frame " << currentFrame << ": Ball hit by the right player!" << std::endl;
                     displayMessage = "Ball hit by the right player!";
                     ball_left_hit = false;
                 }
@@ -108,7 +110,7 @@ int main() {
 
             if (currentPos.x > prevPos.x) {
                 if (ball_right_hit) {
-                    std::cout << "Ball hit by the left player!" << std::endl;
+                    std::cout << "Frame " << currentFrame << ": Ball hit by the left player!" << std::endl;
                     displayMessage = "Ball hit by the left player!";
                     ball_right_hit = false;
                 }

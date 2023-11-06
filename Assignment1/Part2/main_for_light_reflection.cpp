@@ -8,10 +8,6 @@
 #include "opencv2/imgcodecs.hpp"
 #include "opencv2/highgui.hpp"
 #include <iostream>
-#include <fstream>
-#include <list>
-#include <chrono>
-#include <thread>
 
 using namespace cv;
 using namespace std;
