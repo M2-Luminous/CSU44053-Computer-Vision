@@ -18,6 +18,25 @@ void rescaleFrame(cv::Mat& frame, double scale) {
     cv::resize(frame, frame, cv::Size(width, height), 0, 0, cv::INTER_AREA);
 }
 
+bool computeIntersection(Vec2f line1, Vec2f line2, Point2f& intersection) {
+    float rho1 = line1[0], theta1 = line1[1];
+    float rho2 = line2[0], theta2 = line2[1];
+
+    double a1 = cos(theta1), b1 = sin(theta1);
+    double a2 = cos(theta2), b2 = sin(theta2);
+
+    double det = a1 * b2 - a2 * b1;
+    if (fabs(det) < 1e-6) { // Lines are parallel or coincident
+        return false;
+    }
+
+    double x = (b2 * rho1 - b1 * rho2) / det;
+    double y = (a1 * rho2 - a2 * rho1) / det;
+
+    intersection = Point2f(x, y);
+    return true; // Intersection point found
+}
+
 
 int main(int argc, const char** argv)
 {
@@ -105,27 +124,86 @@ int main(int argc, const char** argv)
         Mat canny_image;
         Canny(blueMask, canny_image, 50, 200, 3);
 
-        vector<Vec2f> lines; // will hold the results of the detection
-        HoughLines(blueMask, lines, 1, CV_PI / 180, 50, 0, 0); // runs the actual detection
-        // Draw the lines
-        for (size_t i = 0; i < lines.size(); i++)
-        {
-            float rho = lines[i][0], theta = lines[i][1];
-            Point pt1, pt2;
+        // Detect lines using Hough Line Transform
+        vector<Vec2f> lines;
+        HoughLines(blueMask, lines, 1, CV_PI / 180, 50, 0, 0); // The '50' here is the threshold
+
+        // Merge closely overlapping lines
+        const float minDistance = 30; // Set the minimum distance to consider lines as similar
+        const float minAngle = CV_PI / 18; // Set the minimum angle difference to consider lines as similar (10 degrees)
+
+        vector<Vec2f> mergedLines;
+        for (size_t i = 0; i < lines.size(); ++i) {
+            float rho1 = lines[i][0], theta1 = lines[i][1];
+            bool merged = false;
+
+            for (size_t j = 0; j < mergedLines.size(); ++j) {
+                float rho2 = mergedLines[j][0], theta2 = mergedLines[j][1];
+
+                // Check if lines are similar (close and almost parallel)
+                if (fabs(rho1 - rho2) < minDistance && fabs(theta1 - theta2) < minAngle) {
+                    // Merge lines by averaging their parameters
+                    mergedLines[j] = Vec2f((rho1 + rho2) / 2, (theta1 + theta2) / 2);
+                    merged = true;
+                    break;
+                }
+            }
+
+            if (!merged) {
+                mergedLines.push_back(lines[i]);
+            }
+        }
+
+        // Proceed with drawing merged lines
+        for (size_t i = 0; i < mergedLines.size(); ++i) {
+            float rho = mergedLines[i][0], theta = mergedLines[i][1];
+
+            // Convert polar coordinates to endpoints
             double a = cos(theta), b = sin(theta);
             double x0 = a * rho, y0 = b * rho;
-            pt1.x = cvRound(x0 + 1000 * (-b));
-            pt1.y = cvRound(y0 + 1000 * (a));
-            pt2.x = cvRound(x0 - 1000 * (-b));
-            pt2.y = cvRound(y0 - 1000 * (a));
+            Point pt1(cvRound(x0 + 1000 * (-b)), cvRound(y0 + 1000 * (a)));
+            Point pt2(cvRound(x0 - 1000 * (-b)), cvRound(y0 - 1000 * (a)));
+
+            // Draw the merged lines
             line(current_image, pt1, pt2, Scalar(0, 0, 255), 3, LINE_AA);
         }
+
+        // Make a copy of the original image for displaying red dots
+        Mat redDotsImage = image1[i].clone();
+        rescaleFrame(redDotsImage, 0.15);
+
+        // Find intersections among merged lines
+        vector<Point2f> intersections;
+
+        for (size_t i = 1; i < mergedLines.size(); ++i) {
+            for (size_t j = i + 1; j < mergedLines.size(); ++j) {
+                float rho1 = mergedLines[i][0], theta1 = mergedLines[i][1];
+                float rho2 = mergedLines[j][0], theta2 = mergedLines[j][1];
+
+                // Calculate intersection between merged lines
+                Point2f intersectionPoint;
+                if (computeIntersection(Vec2f(rho1, theta1), Vec2f(rho2, theta2), intersectionPoint)) {
+                    intersections.push_back(intersectionPoint);
+                }
+            }
+        }
+
+        // Draw red dots at intersection points on the redDotsImage
+        for (const auto& intersection : intersections) {
+            circle(redDotsImage, intersection, 5, Scalar(0, 0, 255), -1);
+        }
+
+
+        // Display the updated image with red dots representing intersections on the original image
+        imshow("Red Dots at Intersections", redDotsImage);
+
+        // Display the result image with the blue color filtered
+        imshow("Blue Color Filtered Image", blueMask);
 
         // Display the processed image after multiple CLAHE iterations and saturation adjustment
         imshow("Processed Image with Enhanced CLAHE and Saturation Adjustment", current_image);
 
-        // Display the result image with the blue color filtered
-        imshow("Blue Color Filtered Image", blueMask);
+
 
         // Wait for a key press and close the windows
         cv::waitKey(0);

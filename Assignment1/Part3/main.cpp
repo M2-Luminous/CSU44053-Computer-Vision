@@ -56,7 +56,7 @@ int main() {
 
         if (ballPositions.empty()) {
             frames_without_ball++;
-            if (frames_without_ball > 3) {
+            if (frames_without_ball > 10) {
                 std::cout << "Frame " << currentFrame << ": The ball is out of bounds!" << std::endl;
                 displayMessage = "The ball is out of bounds!";
                 frames_without_ball = 0;
