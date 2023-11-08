@@ -27,7 +27,7 @@ def compute_area(corner_set):
     return cv2.contourArea(np.array(corner_set))
 
 # Load the image
-image = cv2.imread("C:/Vision/Assignment_part2/tables/Table1.jpg")
+image = cv2.imread("C:/Vision/Assignment_part2/tables/Table5.jpg")
 
 # Convert the image to HSV
 hsv = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
@@ -51,8 +51,8 @@ hsv[:, :, 2] = v_channel
 hsv[:, :, 1] = saturation
 
 # Define the range for blue color in HSV
-lower_blue = np.array([90, 50, 35])#for table1
-#lower_blue = np.array([90, 50, 45])#for table3, 4, 5
+#lower_blue = np.array([90, 50, 35])#for table1
+lower_blue = np.array([90, 50, 45])#for table3, 4, 5
 upper_blue = np.array([170, 255, 255])
 
 # Threshold the HSV image to get only blue colors
@@ -73,8 +73,6 @@ rescaled_blue_filtered = rescale_frame(blue_filtered, 0.15)
 gray = cv2.cvtColor(blue_filtered, cv2.COLOR_BGR2GRAY)
 gray = cv2.dilate(gray, kernel, iterations=10)
 rescaled_gray = rescale_frame(gray, 0.15)
-
-cv2.imshow("Grayscale Image", rescaled_gray)
 
 # Find contours in the blue-filtered image
 _, thresh = cv2.threshold(gray, 50, 255, 0)
@@ -107,7 +105,21 @@ for corner in best_combination:
     x, y = corner.ravel()
     cv2.circle(image, (x, y), 20, (0, 0, 255), -1)
 
-cv2.imshow("Blue Color Filtered Image", rescaled_blue_filtered)
+# Convert best_combination to a format suitable for cv2.getPerspectiveTransform
+src_pts = np.float32([corner.ravel() for corner in best_combination])
+
+# Define destination points for the transformation
+width, height = 800, 600  # Example width and height
+dst_pts = np.float32([[0, 0], [width, 0], [width, height], [0, height]])
+
+# Compute the perspective transform matrix
+M = cv2.getPerspectiveTransform(src_pts, dst_pts)
+
+# Apply the perspective transformation to the original image
+transformed_image = cv2.warpPerspective(image, M, (width, height))
+
+# Display the transformed image
+cv2.imshow("Transformed Image", transformed_image)
 cv2.imshow("Shapes with Corners", rescale_frame(image, 0.25))
 cv2.waitKey(0)
 cv2.destroyAllWindows()
