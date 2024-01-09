@@ -29,3 +29,24 @@ Assignment1: Table Tennis includes 3 part of code that was built for detecting s
     Locate all frames in which the ball changes direction.  Label each of these as 
     (a) ball bounced on the table, (b) ball hit by player, (c) ball hit the net or (d) ball hit something else.  
     Determine your system accuracy on the table tennis video.
+
+the new version of computer vision assignment included 
+
+    Part1:
+    mean_shift.py for part 1 solution
+    Balls images for code processing
+
+    Part2:
+    mannual approach: watershed_segmentation.py for part 2 solution
+    5 watershed segmented jpg image
+    automated approach: back_projection.py for part 2 solution
+    2 sample image for back projection
+    5 original table image for target image
+    (note that the automated approach is unable to process table 2 because of heavy light reflection)
+
+    Part3:
+    ball_tracking.py for part 3 solution
+    TableTennis.avi for original video
+    processed video.mp4 for processed video
+
+    a report attached as well called CV documentation.py
